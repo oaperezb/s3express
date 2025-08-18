@@ -15,66 +15,12 @@ spec:
       labels:
         app: s3express-app
     spec:
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: api-tool-pro
       serviceAccountName: s3express-sa
       containers:
       - name: s3express-container
-        image: public.ecr.aws/amazonlinux/amazonlinux:latest
-        command:
-          - bash
-          - '-lc'
-          - |
-            set -euo pipefail
-
-            # Install required packages
-            dnf -y install --allowerasing unzip curl util-linux procps-ng fuse
-
-            # Install mountpoint-s3
-            dnf -y install https://s3.amazonaws.com/mountpoint-s3-release/latest/x86_64/mount-s3.rpm
-
-            # Install AWS CLI
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            ./aws/install
-
-            # Create mount directory and ensure it's clean
-            mkdir -p /mnt/s3express
-            
-            # Unmount if already mounted
-            umount /mnt/s3express 2>/dev/null || true
-            
-            # Wait a moment for unmount to complete
-            sleep 2
-
-            # Clean up AWS credentials (remove any newlines)
-            export AWS_ACCESS_KEY_ID=$(echo $AWS_ACCESS_KEY_ID | tr -d '\n\r')
-            export AWS_SECRET_ACCESS_KEY=$(echo $AWS_SECRET_ACCESS_KEY | tr -d '\n\r')
-            
-            # Test AWS credentials and bucket access
-            echo "Testing AWS credentials..."
-            aws sts get-caller-identity
-            
-            echo "Testing S3Express bucket access..."
-            aws s3 ls s3://$S3EXPRESS_BUCKET_NAME --region $AWS_REGION
-            
-            echo "Mounting S3Express bucket..."
-            # Mount S3Express bucket with increased timeout
-            timeout 60 mount-s3 --region $AWS_REGION $S3EXPRESS_BUCKET_NAME /mnt/s3express &
-            
-            # Wait for mount to be ready
-            echo "Waiting for mount to be ready..."
-            sleep 10
-            
-            # Check if mount is successful
-            if mount | grep -q "/mnt/s3express"; then
-                echo "S3Express bucket mounted successfully!"
-                ls -la /mnt/s3express
-            else
-                echo "Mount failed or not ready yet"
-                ps aux | grep mount-s3 || echo "mount-s3 process not found"
-            fi
-
-            # Keep container running
-            tail -f /dev/null
+        image: 218475412486.dkr.ecr.us-east-1.amazonaws.com/s3express-mountpoint:latest
         env:
         - name: AWS_REGION
           value: "us-east-1"
@@ -90,7 +36,6 @@ spec:
             secretKeyRef:
               name: aws-credentials
               key: secret-access-key
-
         securityContext:
           privileged: true  # Required for mounting
         resources:
@@ -100,7 +45,6 @@ spec:
           limits:
             memory: "2Gi"
             cpu: "1000m"
-
       restartPolicy: Always
 ---
 apiVersion: v1
