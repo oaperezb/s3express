@@ -341,7 +341,6 @@ Found pods: s3express-app-d98b5b67f-2s8nt s3express-app-d98b5b67f-5tlmg s3expres
    📊 Getting folder size...
    📈 Folder size: 55G (took 1.008554000s)
    🔍 Quick file existence check...
-E0818 12:18:07.365307   90564 websocket.go:296] Unknown stream id 1, discarding message
 command terminated with exit code 1
 
 🔍 Checking pod 2: s3express-app-d98b5b67f-5tlmg
