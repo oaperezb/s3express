@@ -20,7 +20,7 @@ spec:
       serviceAccountName: s3express-sa
       containers:
       - name: s3express-container
-        image: 218475412486.dkr.ecr.us-east-1.amazonaws.com/s3express-mountpoint:latest
+        image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/s3express-mountpoint:latest
         env:
         - name: AWS_REGION
           value: "us-east-1"

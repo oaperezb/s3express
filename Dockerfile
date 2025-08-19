@@ -1,21 +1,13 @@
 # Build stage
 FROM public.ecr.aws/amazonlinux/amazonlinux:latest AS builder
 
-# Install required packages for building
-RUN dnf -y install --allowerasing \
-    unzip \
-    curl \
-    util-linux \
-    procps-ng \
-    fuse \
-    fuse-libs \
-    && dnf clean all
-
 # Install mountpoint-s3
 RUN dnf -y install https://s3.amazonaws.com/mountpoint-s3-release/latest/x86_64/mount-s3.rpm
 
 # Install AWS CLI using package manager
 RUN dnf -y install awscli && dnf clean all
+
+# ------------------------------------------------------------
 
 # Runtime stage
 FROM public.ecr.aws/amazonlinux/amazonlinux:latest AS runtime
@@ -33,8 +25,6 @@ RUN dnf -y install --allowerasing \
 
 # Copy mountpoint-s3 from builder stage
 COPY --from=builder /usr/bin/mount-s3 /usr/bin/mount-s3
-
-
 
 # Create mount directory
 RUN mkdir -p /mnt/s3express
